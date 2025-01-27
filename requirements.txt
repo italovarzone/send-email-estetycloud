@@ -1,0 +1,4 @@
+requests
+schedule
+sib-api-v3-sdk
+python-dotenv
