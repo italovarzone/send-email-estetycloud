@@ -1,3 +1,4 @@
+from flask import Flask, jsonify
 import requests
 import datetime
 import schedule
@@ -5,6 +6,7 @@ import time
 from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from dotenv import load_dotenv
 import os
+import threading
 
 # Carregar as variáveis do arquivo .env
 load_dotenv()
@@ -16,6 +18,14 @@ API_USERNAME = os.getenv("API_USERNAME")  # Nome de usuário para autenticação
 API_PASSWORD = os.getenv("API_PASSWORD")  # Senha para autenticação
 EMAIL_TO_NOTIFY = os.getenv("EMAIL_TO_NOTIFY")  # Email de destino
 EMAIL_SENDER = {"name": "Estety Cloud", "email": "lashappapi@gmail.com"}  # Configuração do remetente
+
+# Inicializar o Flask
+app = Flask(__name__)
+
+# Endpoint fake
+@app.route('/fake-endpoint', methods=['GET'])
+def fake_endpoint():
+    return jsonify({"message": "O endpoint foi acessado com sucesso!", "timestamp": datetime.datetime.now().isoformat()}), 200
 
 # Autenticação na API externa
 def authenticate():
@@ -108,10 +118,28 @@ def periodic_notification():
     except Exception as e:
         print(f"Erro na notificação periódica: {e}")
 
-schedule.every().day.at("05:00").do(periodic_notification)
+# Agendar o acesso periódico ao endpoint fake
+def schedule_fake_endpoint_access():
+    def access_endpoint():
+        try:
+            response = requests.get("https://send-email-estetycloud.onrender.com/fake-endpoint")
+            if response.status_code == 200:
+                print(f"Endpoint fake acessado: {response.json()}")
+            else:
+                print(f"Falha ao acessar o endpoint fake: {response.status_code}")
+        except Exception as e:
+            print(f"Erro ao acessar o endpoint fake: {e}")
 
-# Mantém o script em execução
-if __name__ == "__main__":
+    schedule.every(5).minutes.do(access_endpoint)
+
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+# Iniciar o servidor Flask e o agendamento
+if __name__ == "__main__":
+    # Executar o agendamento em uma thread separada
+    threading.Thread(target=schedule_fake_endpoint_access, daemon=True).start()
+
+    # Iniciar o servidor Flask
+    app.run(port=5000, debug=True)
