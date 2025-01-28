@@ -141,5 +141,5 @@ if __name__ == "__main__":
     # Executar o agendamento em uma thread separada
     threading.Thread(target=schedule_fake_endpoint_access, daemon=True).start()
 
-    # Iniciar o servidor Flask
-    app.run(port=5000, debug=True)
+    port = int(os.getenv("PORT", 5000))  # Porta padrão 5000, caso não esteja definida
+    app.run(host="0.0.0.0", port=port, debug=True)
