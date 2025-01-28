@@ -131,9 +131,10 @@ def schedule_fake_endpoint_access():
             print(f"Erro ao acessar o endpoint fake: {e}")
 
     schedule.every(5).minutes.do(access_endpoint)
-
+    schedule.every().day.at("05:00").do(periodic_notification)
+    
     while True:
-        schedule.run_pending()
+        schedule.run_pending()  
         time.sleep(1)
 
 # Iniciar o servidor Flask e o agendamento
