@@ -122,7 +122,7 @@ def periodic_notification():
 def schedule_fake_endpoint_access():
     def access_endpoint():
         try:
-            response = requests.get("https://send-email-estetycloud.onrender.com/fake-endpoint")
+            response = requests.get("https://send-email-estetycloud-6ywi.onrender.com/fake-endpoint")
             if response.status_code == 200:
                 print(f"Endpoint fake acessado: {response.json()}")
             else:
